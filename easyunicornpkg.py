@@ -79,7 +79,7 @@ def generate_package_table(
     out = []
 
     if generated_notice:
-        out.append("-- Generated with easyunicornpkg \u00A9Commandcracker")
+        out.append("-- Generated with easyunicornpkg, (c) 2022 Commandcracker")
 
     if url:
         out.append(f'-- {url}')
