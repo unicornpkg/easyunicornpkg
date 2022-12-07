@@ -26,7 +26,6 @@ from re import (
 from urllib.request import urlopen
 from argparse import ArgumentParser
 from json import loads
-from sys import exit as sys_exit
 from typing import Union
 from pathlib import Path
 
