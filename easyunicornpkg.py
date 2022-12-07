@@ -37,7 +37,6 @@ from pathlib import Path
 TODO: Add providers:
     - com.github.release
     - com.github.gist
-    - com.gitlab
     - local.generic
     - org.bitbucket
 TODO: Multiple URL support
@@ -72,7 +71,9 @@ def generate_package_table(
     out = []
 
     if generated_notice:
-        out.append("-- Generated with https://github.com/unicornpkg/easyunicornpkg")
+        out.append(
+            "-- Generated with https://github.com/unicornpkg/easyunicornpkg"
+        )
 
     if url:
         out.append(f'-- {url}')
@@ -122,15 +123,12 @@ def gen_from_github(
     if whitelist is True:
         whitelist = [".lua"]
 
-    reposinfo = http_get_dict(
-        f"https://api.github.com/repos/{repo_owner}/{repo_name}",
-    )
+    repos_url = "https://api.github.com/repos/"
+    reposinfo = http_get_dict(f"{repos_url}{repo_owner}/{repo_name}",)
     branch = reposinfo.get("default_branch")
-
     tree = http_get_dict(
-        f"https://api.github.com/repos/{repo_owner}/{repo_name}/git/trees/{branch}?recursive=1"
+        f"{repos_url}{repo_owner}/{repo_name}/git/trees/{branch}?recursive=1"
     )
-
     filemaps = {}
 
     for item in tree.get("tree"):
@@ -153,6 +151,45 @@ def gen_from_github(
         repo_owner=reposinfo.get("owner").get("login"),
         repo_name=reposinfo.get("name"),
         repo_ref=branch
+    )
+
+
+def gen_from_gitlab(
+    repo_owner: str,
+    repo_name: str,
+    target_location: str,
+    whitelist: list = True
+) -> list:
+    if whitelist is True:
+        whitelist = [".lua"]
+
+    projects_url = "https://gitlab.com/api/v4/projects/"
+    reposinfo = http_get_dict(f"{projects_url}{repo_owner}%2F{repo_name}")
+    tree = http_get_dict(
+        f"{projects_url}{repo_owner}%2F{repo_name}/repository/tree?recursive=1"
+    )
+    filemaps = {}
+
+    for item in tree:
+        if item.get("type") == "blob":
+            path = item.get("path")
+
+            if whitelist:
+                suffix = Path(path).suffix
+                if suffix not in whitelist:
+                    continue
+
+            filemaps[path] = f'{target_location}{path}'
+
+    return generate_package_table(
+        filemaps=filemaps,
+        pkgType="com.gitlab",
+        url=f"https://gitlab.com/{repo_owner}/{repo_name}",
+        name=reposinfo.get("path"),
+        desc=reposinfo.get("description"),
+        repo_owner=repo_owner,
+        repo_name=reposinfo.get("path"),
+        repo_ref=reposinfo.get("default_branch")
     )
 
 
@@ -181,7 +218,18 @@ def git_resolver(url: str, no_whitelist: bool) -> Union[list, None]:
         )
 
     if "gitlab.com" in host:
-        sys_exit("GitLab is currently not supported")
+        if no_whitelist:
+            return gen_from_gitlab(
+                groups.get("owner"),
+                groups.get("repo"),
+                "",
+                whitelist=None
+            )
+        return gen_from_gitlab(
+            groups.get("owner"),
+            groups.get("repo"),
+            ""
+        )
 
     # The resolver dos not support this git provider
     return None
