@@ -37,7 +37,6 @@ from pathlib import Path
 TODO: Add providers:
     - com.github.release
     - com.github.gist
-    - local.generic
     - org.bitbucket
 TODO: Multiple URL support
 TODO: Error Codes
@@ -259,7 +258,13 @@ def automatic_resolver(url: str, no_whitelist: bool) -> list:
         if result:
             return result
 
-    sys_exit("URL not supported")
+    return generate_package_table(
+        filemaps={
+            url: "<Unknown>"
+        },
+        pkgType="local.generic",
+        url=url
+    )
 
 
 def main():
