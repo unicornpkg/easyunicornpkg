@@ -35,7 +35,6 @@ from pathlib import Path
 """ Todos:
 TODO: Add providers:
     - com.github.release
-    - com.github.gist
     - org.bitbucket
 TODO: Multiple URL support
 TODO: Error Codes
@@ -46,6 +45,16 @@ git_pattern = re_compile(r'''
 (?P<host>(git@|https://)([\w\.@]+)(/|:))
 (?P<owner>[\w,\-,\_]+)/
 (?P<repo>[\w,\-,\_]+)(.git){0,1}((/){0,1})
+''', RegexFlag.VERBOSE)
+
+gist_raw_url_pattern = re_compile(r'''
+^(?P<protocol>.*):\/\/
+(?P<host>.*)\/
+(?P<owner>.*)\/
+(?P<gistid>.*)
+\/raw\/
+(?P<fileid>.*)\/
+(?P<filename>.*)$
 ''', RegexFlag.VERBOSE)
 
 
@@ -191,6 +200,45 @@ def gen_from_gitlab(
     )
 
 
+def gen_from_gists(
+    repo_owner: str,
+    repo_name: str,
+    target_location: str,
+    # pylint: disable-next=unused-argument
+    whitelist: list = True
+) -> list:
+    git = http_get_dict(f"https://api.github.com/gists/{repo_name}")
+    files = git.get("files")
+
+    fileid = "<Unknown>"
+    filename = "<Unknown>"
+
+    filemaps = {}
+
+    for file_name in files:
+        raw_url = files.get(file_name).get("raw_url")
+
+        result = re_search(gist_raw_url_pattern, raw_url)
+        groups = result.groupdict()
+
+        fileid = groups.get("fileid")
+        filename = groups.get("filename")
+        filemaps[filename] = f"{target_location}{filename}"
+        break
+
+    return generate_package_table(
+        filemaps=filemaps,
+        pkgType="com.github.gist",
+        url=f"https://gist.github.com/{repo_owner}/{repo_name}",
+        desc=git.get("description"),
+        name=filename,
+        repo_owner=repo_owner,
+        repo_name=repo_name,
+        repo_ref=fileid
+    )
+
+
+# pylint: disable-next=too-many-return-statements
 def git_resolver(url: str, no_whitelist: bool) -> Union[list, None]:
     result = re_search(git_pattern, url)
 
@@ -200,6 +248,13 @@ def git_resolver(url: str, no_whitelist: bool) -> Union[list, None]:
 
     groups = result.groupdict()
     host = groups.get("host")
+
+    if "gist.github.com" in host:
+        return gen_from_gists(
+            groups.get("owner"),
+            groups.get("repo"),
+            "",
+        )
 
     if "github.com" in host:
         if no_whitelist:
