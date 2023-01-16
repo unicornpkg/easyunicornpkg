@@ -1,17 +1,30 @@
-from setuptools import setup, find_packages
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Build python package
+"""
+
 from os.path import dirname, join, abspath
+from setuptools import setup, find_packages
 # def read_requirements(file):
 #    with open(file) as f:
 #        return f.read().splitlines()
 
 
 def read(rel_path: str) -> str:
+    """
+    Get content of file
+    """
     here = abspath(dirname(__file__))
-    with open(join(here, rel_path)) as fp:
-        return fp.read()
+    with open(join(here, rel_path), encoding="utf-8") as file:
+        return file.read()
 
 
 def get_version(rel_path: str) -> str:
+    """
+    Get version of python module
+    """
     for line in read(rel_path).splitlines():
         if line.startswith("__version__"):
             delim = '"' if '"' in line else "'"
@@ -22,6 +35,9 @@ def get_version(rel_path: str) -> str:
 # requirements = read_requirements("requirements.txt")
 
 def main() -> None:
+    """
+    run setup
+    """
     setup(
         name="easyunicornpkg",
         version=get_version("easyunicornpkg/__init__.py"),
