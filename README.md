@@ -1,6 +1,6 @@
 # easyunicornpkg
 
-easyunicornpkg is a command-line tool for generating a package table for unicornpkg from a URL.
+easyunicornpkg is a command-line tool for generating a package table for [unicornpkg](https://unicornpkg.madefor.cc/) from a URL.
 
 Out of the box, this supports the following providers:
 
