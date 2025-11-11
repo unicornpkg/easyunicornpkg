@@ -62,7 +62,7 @@ def http_get_dict(url: str) -> dict:
     return loads(urlopen(url, timeout=10).read())
 
 
-# pylint: disable-next=too-many-positional-arguments
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def generate_package_table(
     filemaps: dict,
     # pylint: disable-next=invalid-name
