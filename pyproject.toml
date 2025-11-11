@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "easyunicornpkg"
+dynamic = ["version"]
+description = "Python utility to build a unicornpkg package table."
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    { name = "Commandcracker" },
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.scripts]
+easyunicornpkg = "easyunicornpkg.easyunicornpkg:main"
+
+[project.urls]
+Source = "https://github.com/unicornpkg/easyunicornpkg"
+Tracker = "https://github.com/unicornpkg/easyunicornpkg/issues"
+
+[tool.hatch.version]
+path = "easyunicornpkg/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/easyunicornpkg",
+]
