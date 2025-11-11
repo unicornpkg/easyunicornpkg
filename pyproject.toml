@@ -19,6 +19,9 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 
+[dependency-groups]
+lint = ["pylint"]
+
 [project.scripts]
 easyunicornpkg = "easyunicornpkg.easyunicornpkg:main"
 
