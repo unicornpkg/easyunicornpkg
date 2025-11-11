@@ -10,7 +10,21 @@ Out of the box, this supports the following providers:
 - [x] GitHub Gists
 - [x] Generic raw URLs
 
-Download `easyunicornpkg.py` and execute it on the command-line with `python3 ./easyunicornpkg.py --help`.
+## Installation
+
+easyunicornpkg is [available on PyPI](https://pypi.org/project/easyunicornpkg/). We recommend installing it using [`pipx`](https://pipx.pypa.io/stable/) like so:
+
+```bash
+pipx install easyunicornpkg
+```
+
+If you like to live on the edge, you can also install it directly from [this GitHub repository](https://github.com/unicornpkg/easyunicornpkg):
+
+```bash
+pipx install git+https://github.com/unicornpkg/easyunicornpkg.git
+```
+
+After that, you can run `pipx run easyunicornpkg --help` for more information on using this project.
 
 ## Maintainer
 
