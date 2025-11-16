@@ -19,10 +19,14 @@ limitations under the License.
 # built-in modules
 from re import RegexFlag, compile as re_compile, search as re_search
 from urllib.request import urlopen
+from urllib.error import HTTPError
 from argparse import ArgumentParser
 from json import loads
 from typing import Literal, Union
 from pathlib import Path
+
+# third-party modules
+import backoff
 
 # pylint: disable=missing-function-docstring
 
@@ -59,6 +63,7 @@ gist_raw_url_pattern = re_compile(
 )
 
 
+@backoff.on_exception(backoff.expo, HTTPError, max_time=20)
 def http_get_dict(url: str) -> dict:
     return loads(urlopen(url, timeout=10).read())
 

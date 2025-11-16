@@ -11,6 +11,9 @@ license = "Apache-2.0"
 authors = [
     { name = "Commandcracker" },
 ]
+dependencies = [
+    "backoff",
+]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "License :: OSI Approved :: Apache Software License",
