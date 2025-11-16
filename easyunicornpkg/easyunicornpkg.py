@@ -18,11 +18,7 @@ limitations under the License.
 """
 
 # built-in modules
-from re import (
-    RegexFlag,
-    compile as re_compile,
-    search as re_search
-)
+from re import RegexFlag, compile as re_compile, search as re_search
 from urllib.request import urlopen
 from argparse import ArgumentParser
 from json import loads
@@ -41,13 +37,17 @@ TODO: Error Codes
 """
 
 pastebin_pattern = re_compile(r"pastebin\.com/(?P<id>[0-9a-zA-Z]+)")
-git_pattern = re_compile(r'''
+git_pattern = re_compile(
+    r"""
 (?P<host>(git@|https://)([\w\.@]+)(/|:))
 (?P<owner>[\w,\-,\_]+)/
 (?P<repo>[\w,\-,\_]+)(.git){0,1}((/){0,1})
-''', RegexFlag.VERBOSE)
+""",
+    RegexFlag.VERBOSE,
+)
 
-gist_raw_url_pattern = re_compile(r'''
+gist_raw_url_pattern = re_compile(
+    r"""
 ^(?P<protocol>.*):\/\/
 (?P<host>.*)\/
 (?P<owner>.*)\/
@@ -55,7 +55,9 @@ gist_raw_url_pattern = re_compile(r'''
 \/raw\/
 (?P<fileid>.*)\/
 (?P<filename>.*)$
-''', RegexFlag.VERBOSE)
+""",
+    RegexFlag.VERBOSE,
+)
 
 
 def http_get_dict(url: str) -> dict:
@@ -74,17 +76,15 @@ def generate_package_table(
     repo_name: str = None,
     repo_ref: str = None,
     licensing: str | None = None,
-    generated_notice: bool = True
+    generated_notice: bool = True,
 ) -> list:
     out = []
 
     if generated_notice:
-        out.append(
-            "-- Generated with https://github.com/unicornpkg/easyunicornpkg"
-        )
+        out.append("-- Generated with https://github.com/unicornpkg/easyunicornpkg")
 
     if url:
-        out.append(f'-- {url}')
+        out.append(f"-- {url}")
 
     out.append("")
     out.append("local package = {}")
@@ -116,25 +116,22 @@ def generate_package_table(
 
 def gen_from_pastebin(pastebin_id: str, target_location: str) -> list:
     return generate_package_table(
-        filemaps={
-            pastebin_id: f"{target_location}{pastebin_id}.lua"
-        },
+        filemaps={pastebin_id: f"{target_location}{pastebin_id}.lua"},
         pkgType="com.pastebin",
-        url=f"https://pastebin.com/{pastebin_id}"
+        url=f"https://pastebin.com/{pastebin_id}",
     )
 
 
 def gen_from_github(
-    repo_owner: str,
-    repo_name: str,
-    target_location: str,
-    whitelist: list = True
+    repo_owner: str, repo_name: str, target_location: str, whitelist: list = True
 ) -> list:
     if whitelist is True:
         whitelist = [".lua"]
 
     repos_url = "https://api.github.com/repos/"
-    reposinfo = http_get_dict(f"{repos_url}{repo_owner}/{repo_name}",)
+    reposinfo = http_get_dict(
+        f"{repos_url}{repo_owner}/{repo_name}",
+    )
 
     if reposinfo["license"]:
         license_: str | None = reposinfo["license"]["spdx_id"]
@@ -154,7 +151,7 @@ def gen_from_github(
                 if suffix not in whitelist:
                     continue
 
-            filemaps[path] = f'{target_location}{path}'
+            filemaps[path] = f"{target_location}{path}"
 
     return generate_package_table(
         filemaps=filemaps,
@@ -165,15 +162,12 @@ def gen_from_github(
         licensing=license_,
         repo_owner=reposinfo.get("owner").get("login"),
         repo_name=reposinfo.get("name"),
-        repo_ref=branch
+        repo_ref=branch,
     )
 
 
 def gen_from_gitlab(
-    repo_owner: str,
-    repo_name: str,
-    target_location: str,
-    whitelist: list = True
+    repo_owner: str, repo_name: str, target_location: str, whitelist: list = True
 ) -> list:
     if whitelist is True:
         whitelist = [".lua"]
@@ -194,7 +188,7 @@ def gen_from_gitlab(
                 if suffix not in whitelist:
                     continue
 
-            filemaps[path] = f'{target_location}{path}'
+            filemaps[path] = f"{target_location}{path}"
 
     return generate_package_table(
         filemaps=filemaps,
@@ -204,7 +198,7 @@ def gen_from_gitlab(
         desc=reposinfo.get("description"),
         repo_owner=repo_owner,
         repo_name=reposinfo.get("path"),
-        repo_ref=reposinfo.get("default_branch")
+        repo_ref=reposinfo.get("default_branch"),
     )
 
 
@@ -213,7 +207,7 @@ def gen_from_gists(
     repo_name: str,
     target_location: str,
     # pylint: disable-next=unused-argument
-    whitelist: list = True
+    whitelist: list = True,
 ) -> list:
     git = http_get_dict(f"https://api.github.com/gists/{repo_name}")
     files = git.get("files")
@@ -242,7 +236,7 @@ def gen_from_gists(
         name=filename,
         repo_owner=repo_owner,
         repo_name=repo_name,
-        repo_ref=fileid
+        repo_ref=fileid,
     )
 
 
@@ -267,30 +261,16 @@ def git_resolver(url: str, no_whitelist: bool) -> Union[list, None]:
     if "github.com" in host:
         if no_whitelist:
             return gen_from_github(
-                groups.get("owner"),
-                groups.get("repo"),
-                "",
-                whitelist=None
+                groups.get("owner"), groups.get("repo"), "", whitelist=None
             )
-        return gen_from_github(
-            groups.get("owner"),
-            groups.get("repo"),
-            ""
-        )
+        return gen_from_github(groups.get("owner"), groups.get("repo"), "")
 
     if "gitlab.com" in host:
         if no_whitelist:
             return gen_from_gitlab(
-                groups.get("owner"),
-                groups.get("repo"),
-                "",
-                whitelist=None
+                groups.get("owner"), groups.get("repo"), "", whitelist=None
             )
-        return gen_from_gitlab(
-            groups.get("owner"),
-            groups.get("repo"),
-            ""
-        )
+        return gen_from_gitlab(groups.get("owner"), groups.get("repo"), "")
 
     # The resolver dos not support this git provider
     return None
@@ -310,10 +290,7 @@ def pastebin_resolver(url: str, _unused) -> Union[list, None]:
 
 
 def automatic_resolver(url: str, no_whitelist: bool) -> list:
-    resolvers = [
-        git_resolver,
-        pastebin_resolver
-    ]
+    resolvers = [git_resolver, pastebin_resolver]
 
     for resolver in resolvers:
         result = resolver(url, no_whitelist)
@@ -321,38 +298,30 @@ def automatic_resolver(url: str, no_whitelist: bool) -> list:
             return result
 
     return generate_package_table(
-        filemaps={
-            url: "<Unknown>"
-        },
-        pkgType="local.generic",
-        url=url
+        filemaps={url: "<Unknown>"}, pkgType="local.generic", url=url
     )
 
 
 def main():
     parser = ArgumentParser(
-        prog='easyunicornpkg',
-        description='Python utility to build a unicornpkg package table.'
+        prog="easyunicornpkg",
+        description="Python utility to build a unicornpkg package table.",
     )
 
     parser.add_argument(
-        'URL',
-        type=str,
-        help='the URL that the package table should be generated from.'
+        "URL", type=str, help="the URL that the package table should be generated from."
     )
 
     parser.add_argument(
-        '-W', '--no-whitelist',
-        action='store_true',
-        help="disables the file type whitelist."
+        "-W",
+        "--no-whitelist",
+        action="store_true",
+        help="disables the file type whitelist.",
     )
 
     args = parser.parse_args()
 
-    print("\n".join(automatic_resolver(
-        args.URL,
-        args.no_whitelist
-    )))
+    print("\n".join(automatic_resolver(args.URL, args.no_whitelist)))
 
 
 if __name__ == "__main__":
