@@ -73,6 +73,7 @@ def generate_package_table(
     repo_owner: str = None,
     repo_name: str = None,
     repo_ref: str = None,
+    licensing: str | None = None,
     generated_notice: bool = True
 ) -> list:
     out = []
@@ -89,6 +90,8 @@ def generate_package_table(
     out.append("local package = {}")
     out.append(f'package.name = "{name}"')
     out.append(f'package.desc = "{desc}"')
+    if licensing:
+        out.append(f'package.licensing = "{licensing}"')
     out.append("package.instdat = {}")
 
     if repo_owner:
@@ -132,6 +135,10 @@ def gen_from_github(
 
     repos_url = "https://api.github.com/repos/"
     reposinfo = http_get_dict(f"{repos_url}{repo_owner}/{repo_name}",)
+
+    if reposinfo["license"]:
+        license: str | None = reposinfo["license"]["spdx_id"]
+
     branch = reposinfo.get("default_branch")
     tree = http_get_dict(
         f"{repos_url}{repo_owner}/{repo_name}/git/trees/{branch}?recursive=1"
@@ -155,6 +162,7 @@ def gen_from_github(
         url=f"https://github.com/{repo_owner}/{repo_name}",
         name=reposinfo.get("name").lower(),
         desc=reposinfo.get("description"),
+        licensing=license,
         repo_owner=reposinfo.get("owner").get("login"),
         repo_name=reposinfo.get("name"),
         repo_ref=branch
