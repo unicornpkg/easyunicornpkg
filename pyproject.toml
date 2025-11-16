@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [dependency-groups]
-lint = ["pylint"]
+lint = ["pylint", "ruff"]
 
 [project.scripts]
 easyunicornpkg = "easyunicornpkg.easyunicornpkg:main"
