@@ -133,8 +133,9 @@ def gen_from_github(
         f"{repos_url}{repo_owner}/{repo_name}",
     )
 
+    license_: str | None = None
     if reposinfo["license"]:
-        license_: str | None = reposinfo["license"]["spdx_id"]
+        license_ = reposinfo["license"]["spdx_id"]
 
     branch = reposinfo.get("default_branch")
     tree = http_get_dict(
