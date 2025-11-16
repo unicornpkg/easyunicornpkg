@@ -22,7 +22,7 @@ from re import RegexFlag, compile as re_compile, search as re_search
 from urllib.request import urlopen
 from argparse import ArgumentParser
 from json import loads
-from typing import Union
+from typing import Literal, Union
 from pathlib import Path
 
 # pylint: disable=missing-function-docstring
@@ -69,12 +69,12 @@ def generate_package_table(
     filemaps: dict,
     # pylint: disable-next=invalid-name
     pkgType: str,
-    url: str = None,
+    url: str | None = None,
     name: str = "<Unknown>",
     desc: str = "<Unknown>",
-    repo_owner: str = None,
-    repo_name: str = None,
-    repo_ref: str = None,
+    repo_owner: str | None = None,
+    repo_name: str | None = None,
+    repo_ref: str | None = None,
     licensing: str | None = None,
     generated_notice: bool = True,
 ) -> list:
@@ -123,7 +123,10 @@ def gen_from_pastebin(pastebin_id: str, target_location: str) -> list:
 
 
 def gen_from_github(
-    repo_owner: str, repo_name: str, target_location: str, whitelist: list = True
+    repo_owner: str,
+    repo_name: str,
+    target_location: str,
+    whitelist: list | Literal[True] = True,
 ) -> list:
     if whitelist is True:
         whitelist = [".lua"]
@@ -138,12 +141,12 @@ def gen_from_github(
         license_ = reposinfo["license"]["spdx_id"]
 
     branch = reposinfo.get("default_branch")
-    tree = http_get_dict(
+    tree: list = http_get_dict(
         f"{repos_url}{repo_owner}/{repo_name}/git/trees/{branch}?recursive=1"
-    )
+    )["tree"]
     filemaps = {}
 
-    for item in tree.get("tree"):
+    for item in tree:
         if item.get("type") == "blob":
             path = item.get("path")
 
@@ -168,7 +171,10 @@ def gen_from_github(
 
 
 def gen_from_gitlab(
-    repo_owner: str, repo_name: str, target_location: str, whitelist: list = True
+    repo_owner: str,
+    repo_name: str,
+    target_location: str,
+    whitelist: list | Literal[True] = True,
 ) -> list:
     if whitelist is True:
         whitelist = [".lua"]
@@ -208,7 +214,7 @@ def gen_from_gists(
     repo_name: str,
     target_location: str,
     # pylint: disable-next=unused-argument
-    whitelist: list = True,
+    whitelist: list | Literal[True] = True,
 ) -> list:
     git = http_get_dict(f"https://api.github.com/gists/{repo_name}")
     files = git.get("files")
@@ -249,8 +255,8 @@ def git_resolver(url: str, no_whitelist: bool) -> Union[list, None]:
     if result is None:
         return None
 
-    groups = result.groupdict()
-    host = groups.get("host")
+    groups: dict[str, str] = result.groupdict()
+    host: str = groups.get("host")
 
     if "gist.github.com" in host:
         return gen_from_gists(
@@ -284,8 +290,7 @@ def pastebin_resolver(url: str, _unused) -> Union[list, None]:
     if result is None:
         return None
 
-    groups = result.groupdict()
-    pastebin_id = groups.get("id")
+    pastebin_id: str = result.groupdict()["id"]
 
     return gen_from_pastebin(pastebin_id, "")
 
