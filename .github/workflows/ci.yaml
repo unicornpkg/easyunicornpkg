@@ -1,4 +1,4 @@
-name: Pylint
+name: Continuous Integration
 
 on: 
   push:
@@ -20,9 +20,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --group lint
+        pip install . --group lint
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')
+    - name: Ensuring all files are formatted by Ruff
+      run: |
         ruff format --check
+    - name: Running all tests
+      run: |
+        python -m unittest $(git ls-files 'tests/test_*.py')
 
