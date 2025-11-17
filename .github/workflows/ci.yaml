@@ -3,7 +3,7 @@ name: Continuous Integration
 on: 
   push:
     paths:
-      ["**.py", ".github/workflows"]
+      ["**.py", ".github/workflows", "pyproject.toml"]
 
 jobs:
   build:
