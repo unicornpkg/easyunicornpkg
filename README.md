@@ -12,19 +12,24 @@ Out of the box, this supports the following providers:
 
 ## Installation
 
-easyunicornpkg is [available on PyPI](https://pypi.org/project/easyunicornpkg/). We recommend installing it using [`pipx`](https://pipx.pypa.io/stable/) like so:
-
-```bash
-pipx install easyunicornpkg
-```
-
-If you like to live on the edge, you can also install it directly from [this GitHub repository](https://github.com/unicornpkg/easyunicornpkg):
+You probably want to install it directly from [this GitHub repository](https://github.com/unicornpkg/easyunicornpkg):
 
 ```bash
 pipx install git+https://github.com/unicornpkg/easyunicornpkg.git
 ```
 
 After that, you can run `pipx run easyunicornpkg --help` for more information on using this project.
+
+### From PyPI
+
+> [!IMPORTANT]
+> Deployments to PyPI are [currently broken](https://github.com/unicornpkg/easyunicornpkg/issues/5).
+
+easyunicornpkg is [available on PyPI](https://pypi.org/project/easyunicornpkg/). We recommend installing it using [`pipx`](https://pipx.pypa.io/stable/) like so:
+
+```bash
+pipx install easyunicornpkg
+```
 
 ## Maintainer
 
